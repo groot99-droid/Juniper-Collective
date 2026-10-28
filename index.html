@@ -93,8 +93,13 @@
     #intro-sound-hint { transition: opacity .6s ease; }
     #intro-sound-hint[hidden] { display: none; }
     @media (prefers-reduced-motion: reduce) { #intro { display: none; } }
+    html.intro-seen #intro { display: none; }
   </style>
   <noscript><style>#intro { display: none; }</style></noscript>
+  <script>
+    /* once per visit: skip the intro if it already played in this browser session */
+    try { if (sessionStorage.getItem('jc-intro-seen')) document.documentElement.classList.add('intro-seen'); } catch (e) {}
+  </script>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script id="tailwind-config">
     tailwind.config = {
@@ -708,6 +713,7 @@
   var intro = document.getElementById('intro');
   if (!intro) return;
   var root = document.documentElement;
+  if (root.classList.contains('intro-seen')) { intro.remove(); return; }
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { intro.remove(); return; }
 
   var THANKS_MS = 8000, NAME_MS = 8000;
@@ -760,6 +766,7 @@
   function finish() {
     if (finished) return;
     finished = true;
+    try { sessionStorage.setItem('jc-intro-seen', '1'); } catch (e) {}
     timers.forEach(clearTimeout);
     intro.classList.add('done');
     root.classList.remove('intro-lock');
