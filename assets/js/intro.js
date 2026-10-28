@@ -10,7 +10,8 @@
   var T_BLUE = 20.5;          // clip second at which the sky is completely blue: ripple + text start
   var TEXT_DELAY = 450;       // ms after the ripple starts until the first line appears
   var THANKS_MS = 4000, NAME_MS = 4000;
-  var ZOOM_FROM = 2.0, ZOOM_TO = 1.06;  // opens on the tree, slowly pulls back
+  var ZOOM_FROM = 2.0, ZOOM_TO = 1.06;  // opens on the tree and pulls back
+  var ZOOM_SPAN = 0.4;                  // the pull-back is done after this fraction of the video
   var ORIGIN = [0.49, 0.50];            // the tree, as a fraction of the frame
   var RIPPLE_AT = [0.5, 0.47];          // ripple centre (where the type sits)
 
@@ -41,7 +42,7 @@
   video.playbackRate = SPEED;
 
   function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
-  function ease(p) { return 0.5 - 0.5 * Math.cos(Math.PI * p); }   // in-out sine
+  function ease(p) { return 1 - Math.pow(1 - p, 3); }   // out-cubic: brisk start, soft landing
 
   function setStage(s) {
     intro.classList.remove('s-thanks', 's-name');
@@ -132,7 +133,7 @@
     if (finished) return;
     var dur = video.duration || 24.04, ct = video.currentTime || 0;
     var p = Math.min(1, ct / dur);
-    var zoom = ZOOM_FROM + (ZOOM_TO - ZOOM_FROM) * ease(p);
+    var zoom = ZOOM_FROM + (ZOOM_TO - ZOOM_FROM) * ease(Math.min(1, p / ZOOM_SPAN));
 
     if (!textStarted && ct >= T_BLUE) startText();
 
