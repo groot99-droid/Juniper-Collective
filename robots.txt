@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://groot99-droid.github.io/Juniper-Collective/sitemap.xml
