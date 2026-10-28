@@ -1,0 +1,47 @@
+<!--
+title: Contact
+description: Write to Juniper Collective about a property, a portfolio or a question you cannot yet name. Offices in Portland, New York and London. Direct intake: inquiries@junipercollective.co.
+nav: contact
+-->
+<section class="page-hero" aria-labelledby="h1">
+  {{photo:writing-desk|A plain wooden writing desk by a window at dawn with a closed notebook, a brass pen, a cup of tea and a sprig of juniper, misty pines beyond.||100vw|eager}}
+  <div class="container">
+    <ol class="crumbs" aria-label="Breadcrumb"><li><a href="index.html">Home</a></li><li aria-current="page">Contact</li></ol>
+    <p class="eyebrow">Contact</p>
+    <h1 id="h1">Tell us what you are building</h1>
+    <p class="lede">Write to us about a property, a portfolio or a question you cannot yet name. We will tell you what it could become.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="split wide-text" style="align-items:start">
+      <div class="reveal">
+        <p>Juniper Collective is a practice with three offices and one way of working. Whether you are weighing a first conversation or a ninth property, the first step is the same: say what you are building.</p>
+        <p>Everything shared with us is held under strict advisory confidentiality.</p>
+        <div class="card static" style="margin-top:32px"><span class="icon-chip">{{icon:mail}}</span><h2 style="font-size:1.6rem">Direct intake</h2><p>Write to <a href="mailto:inquiries@junipercollective.co"><strong>inquiries@junipercollective.co</strong></a>. This is where every inquiry arrives, and where portal requests go as well.</p></div>
+        <div class="offices" style="margin-top:32px">
+          <div class="office">{{icon:pin}}<div><h3>Portland</h3><p>The Cascadia practice, rooted in the Pacific Northwest.</p></div></div>
+          <div class="office">{{icon:pin}}<div><h3>New York</h3><p>A global practice, working across the eastern seaboard and beyond.</p></div></div>
+          <div class="office">{{icon:pin}}<div><h3>London</h3><p>A global practice, working across the United Kingdom and Europe.</p></div></div>
+        </div>
+      </div>
+      <div class="form-card reveal" data-d="1">
+        <h2 style="font-size:1.9rem">Write to us</h2>
+        <p class="form-note">Choose a topic and write a few lines. We will open your email app with it ready to send.</p>
+        <form class="form" data-mailto data-subject="Enquiry from the Juniper Collective site" novalidate>
+          <div class="error-summary" tabindex="-1" role="alert"><h2>Please correct the following before continuing</h2><ul></ul></div>
+          <div class="form-grid">
+            <div class="field"><label for="c-name">Your name <span class="req">(required)</span></label><input id="c-name" name="name" required autocomplete="name" aria-describedby="c-name-err"><p class="error" id="c-name-err"></p></div>
+            <div class="field"><label for="c-email">Your email <span class="req">(required)</span></label><input id="c-email" name="email" type="email" required autocomplete="email" aria-describedby="c-email-err"><p class="error" id="c-email-err"></p></div>
+            <div class="field full"><label for="c-topic">Topic</label>
+              <select id="c-topic" name="topic"><option value="">Choose one</option><option>Advisory</option><option>Project</option><option>Retainer</option><option>Something else</option></select></div>
+            <div class="field full"><label for="c-message">Your message <span class="req">(required)</span></label><textarea id="c-message" name="message" required aria-describedby="c-message-err"></textarea><p class="error" id="c-message-err"></p></div>
+          </div>
+          <button class="btn btn-primary" type="submit">Open in my email app {{icon:arrow-right}}</button>
+          <p class="form-note" data-status role="status">{{icon:lock}} This button opens your own email app with the message filled in. Nothing you type is stored on this site. Discussions are treated under strict advisory confidentiality.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

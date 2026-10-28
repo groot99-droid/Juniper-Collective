@@ -1,0 +1,75 @@
+/* Intro overlay: video, ripple canvas, type. Loaded on the home page only. */
+/* ---------- Intro ---------- */
+html.intro-lock, html.intro-lock body { overflow: hidden; }
+#intro {
+  position: fixed; inset: 0; z-index: 300; overflow: hidden;
+  background: #10233a;
+  transition: opacity 2.2s ease, visibility 0s linear 2.2s;
+}
+#intro.done { opacity: 0; visibility: hidden; pointer-events: none; }
+#intro video, #intro canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  transition: filter 4s ease;
+}
+#intro canvas { opacity: 0; }
+#intro.gl-on canvas { opacity: 1; }
+#intro.gl-on video { visibility: hidden; }
+#intro.s-thanks video, #intro.s-thanks canvas { filter: blur(4px) brightness(.96); }
+#intro.s-name video, #intro.s-name canvas { filter: blur(12px) brightness(.9); }
+#intro::after { /* soft vignette so the type sits in depth */
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0;
+  background: radial-gradient(ellipse at 50% 48%, rgba(8,20,40,.0) 30%, rgba(8,20,40,.5) 100%);
+  transition: opacity 3s ease;
+}
+#intro.s-hold::after { opacity: 1; }
+
+.intro-stage {
+  position: absolute; inset: 0; pointer-events: none;
+  transform: perspective(1100px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform .5s ease-out;
+}
+.intro-card {
+  position: absolute; left: 0; right: 0; top: var(--y); translate: 0 -50%;
+  text-align: center; color: #F6F0E6; font-family: "Cormorant Garamond", serif;
+  opacity: 0; filter: blur(10px); transform: translateY(22px) scale(.985);
+  transition: opacity 1.3s ease, filter 1.3s ease, transform 1.8s cubic-bezier(.2,.7,.2,1);
+}
+.intro-card.on { opacity: 1; filter: none; transform: none; }
+.intro-card.off {
+  opacity: 0; filter: blur(8px); transform: translateY(-12px) scale(1.01);
+  transition-duration: .9s;
+}
+.intro-title {
+  display: block; font-weight: 600; line-height: 1.05; letter-spacing: -.005em;
+  font-size: clamp(46px, 8.6vw, 210px);
+  /* extruded edge + layered ambient shadows = depth */
+  text-shadow:
+    0 1px 0 rgba(196,203,214,.95), 0 2px 0 rgba(150,160,176,.9), 0 3px 0 rgba(104,117,137,.85),
+    0 4px 1px rgba(40,58,84,.6),
+    0 8px 10px rgba(3,10,24,.42), 0 18px 28px rgba(3,10,24,.45), 0 34px 64px rgba(3,10,24,.5);
+}
+.intro-sub {
+  display: block; font-style: italic; font-weight: 400; line-height: 1.1;
+  font-size: clamp(28px, 4.8vw, 112px); margin-top: .08em;
+  text-shadow:
+    0 1px 0 rgba(176,184,198,.9), 0 2px 0 rgba(112,125,146,.8),
+    0 5px 8px rgba(3,10,24,.42), 0 14px 26px rgba(3,10,24,.45), 0 26px 50px rgba(3,10,24,.45);
+}
+.intro-ui {
+  position: absolute; z-index: 2; bottom: max(20px, env(safe-area-inset-bottom));
+  display: flex; align-items: center; gap: 8px;
+  font: 500 11px/1 Manrope, sans-serif; letter-spacing: .16em; text-transform: uppercase;
+  color: rgba(246,240,230,.85);
+}
+.intro-ui button {
+  font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: 999px;
+  background: rgba(8,20,40,.35); border: 1px solid rgba(246,240,230,.3);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  transition: background .2s, border-color .2s;
+}
+.intro-ui button:hover { background: rgba(8,20,40,.55); border-color: rgba(246,240,230,.6); }
+#intro-sound-hint { transition: opacity .6s ease; }
+#intro-sound-hint[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { #intro { display: none; } }
+html.intro-seen #intro { display: none; }

@@ -1,165 +1,35 @@
-<!DOCTYPE html>
-
-<html lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<meta content="web_standard" name="shell-type"/>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Juniper Collective — Advisory &amp; Portfolio Architecture</title>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&amp;family=Manrope:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<style>
-    @layer base {
-      html, body { margin: 0; padding: 0; }
-      body { overscroll-behavior: none; }
-      main > :first-child { margin-top: 0 !important; }
-      main > :last-child { margin-bottom: 0 !important; }
-    }
-    ::-webkit-scrollbar { display: none; }
-
-    /* ---------- Intro ---------- */
-    html.intro-lock, html.intro-lock body { overflow: hidden; }
-    #intro {
-      position: fixed; inset: 0; z-index: 100; overflow: hidden;
-      background: #10233a;
-      transition: opacity 2.2s ease, visibility 0s linear 2.2s;
-    }
-    #intro.done { opacity: 0; visibility: hidden; pointer-events: none; }
-    #intro video, #intro canvas {
-      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-      transition: filter 4s ease;
-    }
-    #intro canvas { opacity: 0; }
-    #intro.gl-on canvas { opacity: 1; }
-    #intro.gl-on video { visibility: hidden; }
-    #intro.s-thanks video, #intro.s-thanks canvas { filter: blur(4px) brightness(.96); }
-    #intro.s-name video, #intro.s-name canvas { filter: blur(12px) brightness(.9); }
-    #intro::after { /* soft vignette so the type sits in depth */
-      content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0;
-      background: radial-gradient(ellipse at 50% 48%, rgba(8,20,40,.0) 30%, rgba(8,20,40,.5) 100%);
-      transition: opacity 3s ease;
-    }
-    #intro.s-hold::after { opacity: 1; }
-
-    .intro-stage {
-      position: absolute; inset: 0; pointer-events: none;
-      transform: perspective(1100px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-      transition: transform .5s ease-out;
-    }
-    .intro-card {
-      position: absolute; left: 0; right: 0; top: var(--y); translate: 0 -50%;
-      text-align: center; color: #F6F0E6; font-family: "Cormorant Garamond", serif;
-      opacity: 0; filter: blur(10px); transform: translateY(22px) scale(.985);
-      transition: opacity 1.3s ease, filter 1.3s ease, transform 1.8s cubic-bezier(.2,.7,.2,1);
-    }
-    .intro-card.on { opacity: 1; filter: none; transform: none; }
-    .intro-card.off {
-      opacity: 0; filter: blur(8px); transform: translateY(-12px) scale(1.01);
-      transition-duration: .9s;
-    }
-    .intro-title {
-      display: block; font-weight: 600; line-height: 1.05; letter-spacing: -.005em;
-      font-size: clamp(46px, 8.6vw, 210px);
-      /* extruded edge + layered ambient shadows = depth */
-      text-shadow:
-        0 1px 0 rgba(196,203,214,.95), 0 2px 0 rgba(150,160,176,.9), 0 3px 0 rgba(104,117,137,.85),
-        0 4px 1px rgba(40,58,84,.6),
-        0 8px 10px rgba(3,10,24,.42), 0 18px 28px rgba(3,10,24,.45), 0 34px 64px rgba(3,10,24,.5);
-    }
-    .intro-sub {
-      display: block; font-style: italic; font-weight: 400; line-height: 1.1;
-      font-size: clamp(28px, 4.8vw, 112px); margin-top: .08em;
-      text-shadow:
-        0 1px 0 rgba(176,184,198,.9), 0 2px 0 rgba(112,125,146,.8),
-        0 5px 8px rgba(3,10,24,.42), 0 14px 26px rgba(3,10,24,.45), 0 26px 50px rgba(3,10,24,.45);
-    }
-    .intro-ui {
-      position: absolute; z-index: 2; bottom: max(20px, env(safe-area-inset-bottom));
-      display: flex; align-items: center; gap: 8px;
-      font: 500 11px/1 Manrope, sans-serif; letter-spacing: .16em; text-transform: uppercase;
-      color: rgba(246,240,230,.85);
-    }
-    .intro-ui button {
-      font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; cursor: pointer;
-      display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: 999px;
-      background: rgba(8,20,40,.35); border: 1px solid rgba(246,240,230,.3);
-      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-      transition: background .2s, border-color .2s;
-    }
-    .intro-ui button:hover { background: rgba(8,20,40,.55); border-color: rgba(246,240,230,.6); }
-    #intro-sound-hint { transition: opacity .6s ease; }
-    #intro-sound-hint[hidden] { display: none; }
-    @media (prefers-reduced-motion: reduce) { #intro { display: none; } }
-    html.intro-seen #intro { display: none; }
-  </style>
-  <noscript><style>#intro { display: none; }</style></noscript>
-  <script>
-    /* once per visit: skip the intro if it already played in this browser session */
-    try { if (sessionStorage.getItem('jc-intro-seen')) document.documentElement.classList.add('intro-seen'); } catch (e) {}
-  </script>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script id="tailwind-config">
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "alpine-green": "#7C8252",
-            "surface-container-highest": "#cce6fc",
-            "inverse-on-surface": "#e5f2ff",
-            "surface-container-low": "#ebf5ff",
-            "surface-container-high": "#d4ebff",
-            "inverse-surface": "#193344",
-            "on-error": "#ffffff",
-            "outline": "#727973",
-            "tertiary-container": "#634944",
-            "background": "#f6faff",
-            "surface-bright": "#f6faff",
-            "on-surface": "#011e2e",
-            "secondary-fixed": "#e1e7af",
-            "surface-container": "#dff0ff",
-            "error-container": "#ffdad6",
-            "on-background": "#011e2e",
-            "primary-container": "#3b5545",
-            "on-surface-variant": "#424843",
-            "juniper-green": "#3B5545",
-            "on-primary": "#ffffff",
-            "secondary": "#5c6235",
-            "outline-variant": "#c2c8c1",
-            "morning-red": "#D6B4AD",
-            "secondary-container": "#dee4ac",
-            "surface-container-lowest": "#ffffff",
-            "primary": "#243e2f",
-            "surface": "#f6faff",
-            "marine-blue": "#263F50",
-            "surface-dim": "#c3ddf3",
-            "fog-white": "#F6F0E6"
-          },
-          borderRadius: {
-            "DEFAULT": "0.125rem",
-            "lg": "0.25rem",
-            "xl": "0.5rem",
-            "full": "0.75rem"
-          },
-          fontFamily: {
-            "display": ["Cormorant Garamond", "serif"],
-            "headline": ["Cormorant Garamond", "serif"],
-            "sans": ["Manrope", "sans-serif"],
-            "body": ["Manrope", "sans-serif"]
-          }
-        }
-      }
-    }
-  </script>
+<meta name="description" content="Juniper Collective is an advisory firm for experience-based businesses. We design how a portfolio of places should feel, who it is for, and how it reaches the world, then stay after the doors open.">
+<meta name="theme-color" content="#12294a">
+<link rel="canonical" href="https://groot99-droid.github.io/Juniper-Collective/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Juniper Collective">
+<meta property="og:title" content="Juniper Collective — Advisory &amp; Portfolio Architecture">
+<meta property="og:description" content="Juniper Collective is an advisory firm for experience-based businesses. We design how a portfolio of places should feel, who it is for, and how it reaches the world, then stay after the doors open.">
+<meta property="og:url" content="https://groot99-droid.github.io/Juniper-Collective/">
+<meta property="og:image" content="https://groot99-droid.github.io/Juniper-Collective/assets/img/cliff-juniper-1200.webp">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<script>
+  document.documentElement.classList.add('js');
+  try { if (sessionStorage.getItem('jc-intro-seen')) document.documentElement.classList.add('intro-seen'); } catch (e) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&amp;family=Manrope:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="stylesheet" href="assets/css/intro.css">
 </head>
-<body class="bg-surface font-body text-on-surface antialiased selection:bg-juniper-green/10 selection:text-primary">
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="i-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></symbol><symbol id="i-arrow-up-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></symbol><symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol><symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16M4 16h16"/></symbol><symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 6 12 12M18 6 6 18"/></symbol><symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="m4 7.5 8 6 8-6"/></symbol><symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s6.5-5.6 6.5-11a6.5 6.5 0 1 0-13 0C5.5 15.4 12 21 12 21Z"/><circle cx="12" cy="10" r="2.2"/></symbol><symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5M12 14.5v2"/></symbol><symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2Z"/></symbol><symbol id="i-swatch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3 3.5 6 6.2 6 9.7a6 6 0 0 1-12 0c0-3.5 3-6.2 6-9.7Z"/><path d="M9.5 14a2.8 2.8 0 0 0 2.5 2"/></symbol><symbol id="i-signal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-4l10-5v14L4 14Z"/><path d="M17.5 9.5a3.5 3.5 0 0 1 0 5M6.5 14.5 8 19h2.5"/></symbol><symbol id="i-door" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20V5.5A1.5 1.5 0 0 1 7.5 4h9A1.5 1.5 0 0 1 18 5.5V20M4 20h16"/><circle cx="14.5" cy="12.5" r=".7" fill="currentColor"/></symbol><symbol id="i-stewardship" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 5 6v5.5c0 4.3 3 7.6 7 9 4-1.4 7-4.7 7-9V6l-7-2.5Z"/><path d="m9 12 2.2 2.2L15.2 10"/></symbol><symbol id="i-diagnostic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5M8 12.5v-2M10.5 12.5v-4M13 12.5v-3"/></symbol><symbol id="i-thesis" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.5"/><circle cx="5" cy="6" r="1.8"/><circle cx="19" cy="6" r="1.8"/><circle cx="12" cy="20" r="1.5"/><path d="m6.5 7.2 3.4 3.3M17.5 7.2l-3.4 3.3M12 14.5v4"/></symbol><symbol id="i-nodes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M5 20v-8l3-2.5L11 12v8"/><path d="M13 20V8l3.5-3L20 8v12M16.5 20v-4"/></symbol><symbol id="i-economics" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16"/><path d="m7 15 3.5-4 3 2.5L19 7"/><path d="M15 7h4v4"/></symbol><symbol id="i-culinary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 18h17"/><path d="M5 18a7 7 0 0 1 14 0"/><path d="M12 11V8.5"/><circle cx="12" cy="7.3" r="1.1"/></symbol><symbol id="i-design" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 5 8-5 10-5-10 5-8Z"/><circle cx="12" cy="11" r="1.4"/><path d="M12 12.4V21"/></symbol><symbol id="i-systems" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="m7.5 9.5 3 2.5-3 2.5M13 15h4"/></symbol><symbol id="i-spatial" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3.5h8l2.5 8h-13l2.5-8Z"/><path d="M12 11.5V19M8.5 20.5h7"/></symbol><symbol id="i-overview" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="4" rx="1.5"/><rect x="13" y="10" width="7" height="10" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/></symbol><symbol id="i-feed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M4 12h16M4 18h12"/><circle cx="19" cy="6" r="1.4" fill="currentColor"/></symbol><symbol id="i-log" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-4.5-2-8-2v14c3.5 0 6 .5 8 2 2-1.5 4.5-2 8-2V4c-3.5 0-6 .5-8 2Z"/><path d="M12 6v14"/></symbol><symbol id="i-milestone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4"/><path d="M6 5h11l-2.5 4L17 13H6"/></symbol><symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h4.5l2 2.5H19a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 18V7.5Z"/></symbol><symbol id="i-support" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h10a1.5 1.5 0 0 1 1.5 1.5v5a1.5 1.5 0 0 1-1.5 1.5H8.5L5 16v-2.5H4A1.5 1.5 0 0 1 2.5 12V7A1.5 1.5 0 0 1 4 5.5Z"/><path d="M18 9h2a1.5 1.5 0 0 1 1.5 1.5v5a1.5 1.5 0 0 1-1.5 1.5v2.5L17 17h-4.5"/></symbol><symbol id="i-sprig" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M12 9c0-3 2-5 5-5 0 3-2 5-5 5Z"/><path d="M12 14.5c0-2.6-1.8-4.4-4.5-4.4 0 2.6 1.8 4.4 4.5 4.4Z"/></symbol><symbol id="i-volume" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4h3.5L12 18V6L7.5 10H4Z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></symbol><symbol id="i-volume-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4h3.5L12 18V6L7.5 10H4Z"/><path d="m16 9.5 4.5 5M20.5 9.5l-4.5 5"/></symbol><symbol id="logo-mark" viewBox="0 0 64 64" fill="currentColor"><path d="M2 57v-6h30c7 0 11-3 14-7l16 5v8H2Z" opacity=".5"/><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M25 51c5-5 1-10 4-16 2.5-5 6-8 7-15" stroke-width="3.6"/><path d="M28 39c-3-1.5-6-1.5-9-4.5" stroke-width="2.2"/><path d="M33 29c4.5-.5 7.5-3 10-7" stroke-width="2.2"/></g><g><ellipse cx="16" cy="32" rx="9.5" ry="4.6" transform="rotate(-6 16 32)"/><ellipse cx="25" cy="23" rx="9" ry="4.4" transform="rotate(-8 25 23)"/><ellipse cx="46" cy="19.5" rx="11" ry="4.8" transform="rotate(-10 46 19.5)"/><ellipse cx="38" cy="10.5" rx="9" ry="4.4" transform="rotate(-8 38 10.5)"/></g></symbol></svg>
 <!-- 0. INTRO -->
-<div id="intro" role="presentation" aria-label="Juniper Collective introduction">
-<video id="intro-video" muted="" playsinline="" autoplay="" preload="auto">
-<source src="media/intro.mp4" type="video/mp4"/>
-<source src="media/intro.webm" type="video/webm"/>
-</video>
+<div id="intro" role="region" aria-label="Introduction">
+<video id="intro-video" muted="" playsinline="" preload="none"></video>
 <canvas id="intro-gl" aria-hidden="true"></canvas>
 <div class="intro-stage" id="intro-stage">
 <div class="intro-card" id="intro-thanks" style="--y:46%">
@@ -172,7 +42,7 @@
 </div>
 <div class="intro-ui" style="left:20px">
 <button type="button" id="intro-sound" aria-pressed="false" aria-label="Toggle sound">
-<span class="material-symbols-outlined" style="font-size:16px" id="intro-sound-icon">volume_up</span>
+<svg class="i" aria-hidden="true" focusable="false"><use id="intro-sound-use" href="#i-volume"/></svg>
 <span id="intro-sound-label">Sound</span>
 </button>
 <span id="intro-sound-hint" hidden="">Tap anywhere for sound</span>
@@ -181,752 +51,294 @@
 <button type="button" id="intro-skip">Skip intro</button>
 </div>
 </div>
-<!-- 1. NAVIGATION BAR -->
-<header class="fixed top-0 left-0 w-full z-50 bg-[#f6faff]/90 backdrop-blur-md border-b border-outline-variant/30 transition-all duration-300">
-<div class="h-20 max-w-[1240px] mx-auto px-6 lg:px-10 flex items-center justify-between">
-<a class="flex flex-col group" href="#">
-<span class="font-headline text-2xl font-bold tracking-tight text-primary group-hover:text-juniper-green transition-colors">Juniper Collective</span>
-<span class="text-[10px] tracking-[0.2em] uppercase font-medium text-alpine-green">Advisory &amp; Portfolio Architecture</span>
-</a>
-<nav class="hidden lg:flex items-center space-x-8">
-<a class="text-sm font-medium text-on-surface-variant hover:text-marine-blue transition-colors" href="#what-we-do">What We Do</a>
-<a class="text-sm font-medium text-on-surface-variant hover:text-marine-blue transition-colors" href="#how-we-work">How We Work</a>
-<a class="text-sm font-medium text-on-surface-variant hover:text-marine-blue transition-colors" href="#specialists">Specialists</a>
-<a class="text-sm font-medium text-on-surface-variant hover:text-marine-blue transition-colors" href="#engagement-models">Engagement Models</a>
-<a class="text-sm font-medium text-on-surface-variant hover:text-marine-blue transition-colors" href="#portal">Client Portal</a>
-</nav>
-<div class="flex items-center space-x-3">
-<a class="hidden sm:inline-flex items-center px-4 py-2 text-xs font-semibold tracking-wider uppercase border border-marine-blue/30 text-marine-blue rounded-lg hover:border-marine-blue hover:bg-marine-blue/5 transition-all" href="#portal">
-          Enter Portal
-        </a>
-<a class="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-wider uppercase bg-juniper-green text-fog-white rounded-lg shadow-sm hover:bg-primary transition-all" href="#contact">
-          Start a Conversation
-        </a>
-</div>
-</div>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="index.html" aria-label="Juniper Collective, home">
+      <svg aria-hidden="true" focusable="false"><use href="#logo-mark"/></svg>
+      <span><span class="brand-name">Juniper Collective</span><span class="brand-sub">Advisory &amp; Portfolio Architecture</span></span>
+    </a>
+    <div class="header-actions">
+      <nav class="nav" id="site-nav" aria-label="Primary">
+        <a href="what-we-do.html">What we do</a>
+        <a href="how-we-work.html">How we work</a>
+        <a href="specialists.html">Specialists</a>
+        <a href="engagements.html">Engagements</a>
+        <a href="portal.html">Client portal</a>
+        <a class="btn btn-primary btn-sm nav-cta-mobile" href="contact.html">Begin a conversation</a>
+      </nav>
+      <a class="btn btn-primary btn-sm" href="contact.html">Begin a conversation</a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-menu"/></svg><span>Menu</span></button>
+    </div>
+  </div>
 </header>
-<main class="w-full pt-20">
-<!-- 2. HERO SECTION -->
-<section class="relative w-full overflow-hidden pt-12 pb-16 lg:pt-16 lg:pb-24">
-<div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[850px] h-[450px] bg-gradient-to-b from-surface-container-high/40 via-surface-container/20 to-transparent blur-3xl pointer-events-none -z-10"></div>
-<div class="max-w-[1240px] mx-auto px-6 lg:px-10">
-<div class="max-w-3xl mb-12">
-<div class="inline-flex items-center gap-2 mb-4">
-<span class="w-2 h-2 rounded-full bg-alpine-green"></span>
-<span class="text-[11px] font-semibold tracking-[0.22em] uppercase text-marine-blue">Portfolio Architecture &amp; Experience Advisory</span>
-</div>
-<h1 class="font-display text-4xl sm:text-6xl lg:text-[68px] font-semibold text-marine-blue tracking-tight leading-[1.08] mb-6">
-            One vision. Every property. <span class="italic font-normal">Open before you open.</span>
-</h1>
-<p class="text-lg sm:text-xl font-light text-on-surface-variant leading-relaxed mb-8 max-w-2xl">
-            Juniper Collective is an advisory firm for experience-based businesses. We design how a portfolio of places should feel, who it is for, and how it reaches the world, then stay with you after the doors open.
-          </p>
-<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-<a class="inline-flex items-center justify-center px-7 py-3.5 bg-juniper-green text-fog-white rounded-lg font-medium text-sm tracking-wide shadow-sm hover:bg-primary transition-all duration-300 group" href="#portal">
-<span>Enter your portal</span>
-<span class="material-symbols-outlined ml-2 text-base group-hover:translate-x-0.5 transition-transform">east</span>
-</a>
-<a class="inline-flex items-center justify-center px-7 py-3.5 border border-outline-variant/60 text-marine-blue hover:bg-surface-container-low transition-colors rounded-lg font-medium text-sm" href="#contact">
-              Begin a diagnostic
-            </a>
-</div>
-</div>
-<!-- Accompanying Visual: Architectural Retreat -->
-<div class="relative w-full rounded-2xl overflow-hidden shadow-xl border border-outline-variant/40 bg-surface-container-low">
-<div class="relative aspect-[16/9] lg:aspect-[21/10] w-full overflow-hidden">
-<img alt="Luxury modern pavilion retreat nestled in forest landscape, evening ambient glow" class="w-full h-full object-cover object-center" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOaEFD6sI0tbVPciZoB3kGaCQxhXA3_-Lh316sOyTcV7H7MsnKfrsPp0e63XXNQDXEqimU0gJXITUfX4RL_BqIl4McsCJzEqfyc6vyOL16p57jrAskAHITn6TQlNi9-iotcF92YxDAxByvsTBvDN1Kcr6EcyMFlI_cX2nqAkUlQkZ2nrP0wyP68e4-fTo_le00Htx62JPEsSGYYIiLRCl2D3XfmOTfS6JTxSY9hp8"/>
-<div class="absolute inset-0 bg-gradient-to-t from-[#011e2e]/80 via-transparent to-transparent"></div>
-<div class="absolute bottom-6 left-6 right-6 lg:bottom-8 lg:left-8 lg:right-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4 text-fog-white">
-<div class="max-w-xl">
-<span class="text-[10px] font-semibold uppercase tracking-[0.2em] px-2.5 py-1 bg-marine-blue/70 backdrop-blur-md rounded border border-fog-white/20 mb-2 inline-block">Portfolio Archetype</span>
-<p class="font-headline text-lg sm:text-xl italic font-normal text-fog-white/95 leading-relaxed">
-                  Advising experience-first properties, boutique retreats, and multi-venue portfolios from concept through sustained operations.
-                </p>
-</div>
-<div class="flex items-center gap-2 text-xs font-mono text-fog-white/70">
-<span class="material-symbols-outlined text-sm text-alpine-green">verified</span>
-<span>Active Advisory Program</span>
-</div>
-</div>
-</div>
-</div>
-</div>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <img src="assets/img/hero-pavilion-1920.webp" srcset="assets/img/hero-pavilion-1200.webp 1200w, assets/img/hero-pavilion-1920.webp 1920w" sizes="100vw" width="1920" height="1086" alt="A low timber and glass retreat pavilion among tall conifers at blue hour, warm light glowing from within, a still pool and fire pit on the terrace." loading="eager" fetchpriority="high" decoding="async">
+  <div class="container">
+    <div>
+      <p class="eyebrow">Advisory &amp; Portfolio Architecture</p>
+      <h1 id="hero-title">One vision. Every property. <em>Open before you open.</em></h1>
+      <p class="lede">Juniper Collective is an advisory firm for experience-based businesses. We design how a portfolio of places should feel, who it is for, and how it reaches the world, then stay with you after the doors open.</p>
+      <div class="btn-row">
+        <a class="btn btn-light" href="contact.html">Tell us what you are building <svg class="i" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></a>
+        <a class="btn btn-outline-light" href="how-we-work.html">See how we work</a>
+      </div>
+    </div>
+    <aside class="glass-dark hero-card" aria-label="A note on the photograph">
+      <p>A pavilion at dusk was decided long before the first guest arrived. That decision is the work.</p>
+      <small><svg class="i" aria-hidden="true" focusable="false"><use href="#i-sprig"/></svg> Advisory &amp; portfolio architecture</small>
+    </aside>
+  </div>
 </section>
-<!-- 3. METHOD ANCHOR STATEMENT -->
-<section class="w-full border-y border-outline-variant/40 bg-surface-container-low/50 py-8 lg:py-10">
-<div class="max-w-[1240px] mx-auto px-6 lg:px-10">
-<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-<div class="flex items-center gap-4">
-<div class="w-10 h-10 rounded-full bg-juniper-green/10 flex items-center justify-center shrink-0">
-<span class="material-symbols-outlined text-juniper-green text-xl">architecture</span>
-</div>
-<div>
-<span class="text-[11px] font-bold uppercase tracking-[0.18em] text-alpine-green block mb-1">Methodology &amp; Doctrine</span>
-<p class="font-headline text-xl sm:text-2xl text-marine-blue font-medium leading-snug">
-                The Juniper Method: One organizing thesis uniting spatial architecture, guest psychology, and commercial strategy across every property you build.
-              </p>
-</div>
-</div>
-<div class="shrink-0 pl-14 md:pl-0">
-<span class="text-xs uppercase tracking-widest text-on-surface-variant font-semibold px-3 py-1.5 rounded bg-surface-container border border-outline-variant/40">Established Framework</span>
-</div>
-</div>
-</div>
+
+<section class="doctrine" aria-label="The Juniper Method">
+  <div class="container">
+    <div class="doctrine-mark"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-compass"/></svg></div>
+    <div>
+      <span class="label">The doctrine</span>
+      <p><strong>The Juniper Method.</strong> One organizing thesis unites spatial architecture, guest psychology and commercial strategy across every property, so the portfolio reads as one world.</p>
+    </div>
+    <span class="badge">The Juniper Method</span>
+  </div>
 </section>
-<!-- 4. WHAT WE DO SECTION -->
-<section class="w-full py-24 bg-surface" id="what-we-do">
-<div class="max-w-[1240px] mx-auto px-6 lg:px-10">
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-<div class="lg:col-span-5 space-y-4">
-<span class="text-[11px] font-semibold tracking-[0.2em] uppercase text-alpine-green">Holistic Portfolio Stewardship</span>
-<h2 class="font-headline text-3xl sm:text-5xl font-semibold text-marine-blue tracking-tight">
-              What We Do
-            </h2>
-<div class="w-12 h-0.5 bg-juniper-green my-2"></div>
-<p class="text-base sm:text-lg text-on-surface-variant font-normal leading-relaxed pt-2">
-              Most firms handle one piece of the work: the brand, the build, the launch, the party. Juniper holds the whole arc. We start with the question <span class="italic text-primary font-medium">“what should this become, and for whom?”</span> and carry it through identity, pricing, audience, pre-launch marketing, and the opening experience itself.
-            </p>
-</div>
-<div class="lg:col-span-7 pt-2">
-<!-- Continuous Arc Representation -->
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-<div class="p-6 rounded-xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm relative">
-<span class="text-xs font-mono font-bold text-alpine-green tracking-wider uppercase mb-2 block">Phase I</span>
-<h3 class="font-headline text-2xl text-marine-blue font-semibold mb-2">Conception &amp; Positioning</h3>
-<p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">Defining the core commercial ethos, property-level differentiation, and initial architectural thesis before ground is broken.</p>
-</div>
-<div class="p-6 rounded-xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm relative">
-<span class="text-xs font-mono font-bold text-alpine-green tracking-wider uppercase mb-2 block">Phase II</span>
-<h3 class="font-headline text-2xl text-marine-blue font-semibold mb-2">Identity &amp; Pricing Architecture</h3>
-<p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">Structuring commercial yield modeling, bespoke visual systems, spatial vernacular, and tiered guest segmentation.</p>
-</div>
-<div class="p-6 rounded-xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm relative">
-<span class="text-xs font-mono font-bold text-alpine-green tracking-wider uppercase mb-2 block">Phase III</span>
-<h3 class="font-headline text-2xl text-marine-blue font-semibold mb-2">Pre-Launch Demand</h3>
-<p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">Generating private interest lists, editorial narrative dissemination, founder salons, and pre-booking momentum.</p>
-</div>
-<div class="p-6 rounded-xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm relative">
-<span class="text-xs font-mono font-bold text-alpine-green tracking-wider uppercase mb-2 block">Phase IV</span>
-<h3 class="font-headline text-2xl text-marine-blue font-semibold mb-2">Opening &amp; Stewardship</h3>
-<p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">Directing on-site experience staging, operational rituals, and ongoing retainer-level design governance.</p>
-</div>
-</div>
-</div>
-</div>
-</div>
+
+<section class="section" id="what-we-do">
+  <div class="container">
+    <div class="split wide-text top">
+      <div class="reveal">
+        <p class="eyebrow">What we do</p>
+        <h2>Four phases, one arc</h2>
+        <p class="lede">Most firms handle one piece: the brand, the build, the launch, the party. A place does not live in one piece. Juniper holds the whole arc, from the question of what a place should become, and for whom, to the morning it opens.</p>
+        <p><a class="link-arrow" href="what-we-do.html">See the four phases <svg class="i" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></a></p>
+      </div>
+      <div class="grid grid-2">
+        <article class="card reveal" data-d="1"><span class="icon-chip"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-compass"/></svg></span><span class="meta">Phase I</span><h3>Conception &amp; positioning</h3><p>The core commercial ethos, the differentiation of each property, and an initial architectural thesis, set before ground is broken.</p></article>
+        <article class="card reveal" data-d="2"><span class="icon-chip"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-swatch"/></svg></span><span class="meta">Phase II</span><h3>Identity &amp; pricing architecture</h3><p>Yield modeling, visual systems, spatial vernacular and tiered guest segmentation, so that price and identity say the same thing.</p></article>
+        <article class="card reveal" data-d="1"><span class="icon-chip"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-signal"/></svg></span><span class="meta">Phase III</span><h3>Pre-launch demand</h3><p>Private interest lists, editorial narrative, founder salons and pre-booking momentum, built while the place is still an idea.</p></article>
+        <article class="card reveal" data-d="2"><span class="icon-chip"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-door"/></svg></span><span class="meta">Phase IV</span><h3>Opening &amp; stewardship</h3><p>On-site experience staging, operational rituals and retainer-level design governance, so the opening holds and the intent outlasts it.</p></article>
+      </div>
+    </div>
+  </div>
 </section>
-<!-- 5. HOW WE WORK (PROCESS PHASE CARDS / TIMELINE) -->
-<section class="w-full py-24 bg-surface-container-low/60 border-y border-outline-variant/30" id="how-we-work">
-<div class="max-w-[1240px] mx-auto px-6 lg:px-10">
-<div class="max-w-2xl mb-16">
-<span class="text-[11px] font-semibold tracking-[0.2em] uppercase text-alpine-green">The Engagement Architecture</span>
-<h2 class="font-headline text-3xl sm:text-5xl font-semibold text-marine-blue tracking-tight mt-1 mb-4">
-            How We Work
-          </h2>
-<p class="text-base text-on-surface-variant font-light">
-            A disciplined six-phase engagement that anchors your properties with singular purpose, preserving intent from blueprint to steady-state hospitality.
-          </p>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-<!-- Step 1 -->
-<div class="bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/30 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
-<div>
-<div class="flex items-center justify-between mb-4">
-<span class="text-3xl font-headline font-bold text-juniper-green/40">01</span>
-<span class="material-symbols-outlined text-alpine-green text-xl">analytics</span>
-</div>
-<h3 class="font-headline text-2xl text-marine-blue font-semibold mb-3">Diagnostic</h3>
-<p class="text-sm text-on-surface-variant font-light leading-relaxed">
-                We evaluate the assets, relationships, materials, and timelines already in your hands.
-              </p>
-</div>
-<div class="mt-6 pt-4 border-t border-outline-variant/20 text-[11px] uppercase tracking-wider text-alpine-green font-medium">Stage: Discovery &amp; Audit</div>
-</div>
-<!-- Step 2 -->
-<div class="bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/30 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
-<div>
-<div class="flex items-center justify-between mb-4">
-<span class="text-3xl font-headline font-bold text-juniper-green/40">02</span>
-<span class="material-symbols-outlined text-alpine-green text-xl">hub</span>
-</div>
-<h3 class="font-headline text-2xl text-marine-blue font-semibold mb-3">Portfolio thesis</h3>
-<p class="text-sm text-on-surface-variant font-light leading-relaxed">
-                One organizing design that makes separate properties read as one world.
-              </p>
-</div>
-<div class="mt-6 pt-4 border-t border-outline-variant/20 text-[11px] uppercase tracking-wider text-alpine-green font-medium">Stage: Conceptual Synthesis</div>
-</div>
-<!-- Step 3 -->
-<div class="bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/30 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
-<div>
-<div class="flex items-center justify-between mb-4">
-<span class="text-3xl font-headline font-bold text-juniper-green/40">03</span>
-<span class="material-symbols-outlined text-alpine-green text-xl">category</span>
-</div>
-<h3 class="font-headline text-2xl text-marine-blue font-semibold mb-3">Brand and audience by node</h3>
-<p class="text-sm text-on-surface-variant font-light leading-relaxed">
-                A mission, identity, price band, and guest profile for each property.
-              </p>
-</div>
-<div class="mt-6 pt-4 border-t border-outline-variant/20 text-[11px] uppercase tracking-wider text-alpine-green font-medium">Stage: Node Specifications</div>
-</div>
-<!-- Step 4 -->
-<div class="bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/30 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
-<div>
-<div class="flex items-center justify-between mb-4">
-<span class="text-3xl font-headline font-bold text-juniper-green/40">04</span>
-<span class="material-symbols-outlined text-alpine-green text-xl">campaign</span>
-</div>
-<h3 class="font-headline text-2xl text-marine-blue font-semibold mb-3">Pre-launch</h3>
-<p class="text-sm text-on-surface-variant font-light leading-relaxed">
-                Renders, stories, and campaigns that build demand before the property exists.
-              </p>
-</div>
-<div class="mt-6 pt-4 border-t border-outline-variant/20 text-[11px] uppercase tracking-wider text-alpine-green font-medium">Stage: Market Cultivation</div>
-</div>
-<!-- Step 5 -->
-<div class="bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/30 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
-<div>
-<div class="flex items-center justify-between mb-4">
-<span class="text-3xl font-headline font-bold text-juniper-green/40">05</span>
-<span class="material-symbols-outlined text-alpine-green text-xl">door_front</span>
-</div>
-<h3 class="font-headline text-2xl text-marine-blue font-semibold mb-3">Opening</h3>
-<p class="text-sm text-on-surface-variant font-light leading-relaxed">
-                The experience product, built and ready on day one.
-              </p>
-</div>
-<div class="mt-6 pt-4 border-t border-outline-variant/20 text-[11px] uppercase tracking-wider text-alpine-green font-medium">Stage: Operational Reality</div>
-</div>
-<!-- Step 6 -->
-<div class="bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/30 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
-<div>
-<div class="flex items-center justify-between mb-4">
-<span class="text-3xl font-headline font-bold text-juniper-green/40">06</span>
-<span class="material-symbols-outlined text-alpine-green text-xl">shield_check</span>
-</div>
-<h3 class="font-headline text-2xl text-marine-blue font-semibold mb-3">Stewardship</h3>
-<p class="text-sm text-on-surface-variant font-light leading-relaxed">
-                We remain on retainer to protect the original intent as operations settle in.
-              </p>
-</div>
-<div class="mt-6 pt-4 border-t border-outline-variant/20 text-[11px] uppercase tracking-wider text-alpine-green font-medium">Stage: Ongoing Retainer</div>
-</div>
-</div>
-</div>
+
+<section class="section section--dark" aria-labelledby="oneworld">
+  <div class="container">
+    <div class="split">
+      <figure class="frame reveal" style="margin:0">
+        <img src="assets/img/three-buildings-1920.webp" srcset="assets/img/three-buildings-1200.webp 1200w, assets/img/three-buildings-1920.webp 1920w" sizes="(min-width: 900px) 560px, 100vw" width="1920" height="1086" alt="Three small timber buildings spaced across one forest clearing, joined by a single curving gravel path at dusk." loading="lazy" decoding="async">
+      </figure>
+      <div class="reveal" data-d="1">
+        <p class="eyebrow">One world</p>
+        <h2 id="oneworld">A portfolio is a single argument made in many places</h2>
+        <p class="lede">Three buildings on one clearing can be three different buildings, or one place seen from three sides. The difference is decided before anything is drawn.</p>
+        <p>That decision is the portfolio thesis: one organizing design that makes separate properties read as one world, then lets each property take its own local form.</p>
+        <p><a class="link-arrow" href="how-we-work.html">Read the six steps <svg class="i" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></a></p>
+      </div>
+    </div>
+  </div>
 </section>
-<!-- 6. OUR SPECIALISTS SECTION -->
-<section class="w-full py-24 bg-surface" id="specialists">
-<div class="max-w-[1240px] mx-auto px-6 lg:px-10">
-<div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-<div>
-<span class="text-[11px] font-semibold tracking-[0.2em] uppercase text-alpine-green">Collective Intelligence</span>
-<h2 class="font-headline text-3xl sm:text-5xl font-semibold text-marine-blue tracking-tight mt-1">
-              Our Specialists
-            </h2>
-</div>
-<p class="text-base text-on-surface-variant max-w-md font-light">
-            Juniper is a collective of experts, matched to your engagement rather than assigned from a bench.
-          </p>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-<!-- Card 1 -->
-<div class="p-7 rounded-xl bg-surface-container-lowest border border-outline-variant/30 hover:border-alpine-green/40 transition-colors">
-<span class="material-symbols-outlined text-primary text-2xl mb-4">finance_mode</span>
-<h3 class="font-headline text-xl font-bold text-marine-blue mb-2">Economics and Experience Architecture</h3>
-<p class="text-sm text-on-surface-variant font-light leading-relaxed">
-              Hospitality business structure, pricing logic, and the design of the guest journey.
-            </p>
-</div>
-<!-- Card 2 -->
-<div class="p-7 rounded-xl bg-surface-container-lowest border border-outline-variant/30 hover:border-alpine-green/40 transition-colors">
-<span class="material-symbols-outlined text-primary text-2xl mb-4">restaurant</span>
-<h3 class="font-headline text-xl font-bold text-marine-blue mb-2">Culinary and Kitchen Management</h3>
-<p class="text-sm text-on-surface-variant font-light leading-relaxed">
-              Concept, menu strategy, and operational readiness.
-            </p>
-</div>
-<!-- Card 3 -->
-<div class="p-7 rounded-xl bg-surface-container-lowest border border-outline-variant/30 hover:border-alpine-green/40 transition-colors">
-<span class="material-symbols-outlined text-primary text-2xl mb-4">draw</span>
-<h3 class="font-headline text-xl font-bold text-marine-blue mb-2">Brand, Marketing, and Product Design</h3>
-<p class="text-sm text-on-surface-variant font-light leading-relaxed">
-              Identity, rendering, storytelling, and campaign.
-            </p>
-</div>
-<!-- Card 4 -->
-<div class="p-7 rounded-xl bg-surface-container-lowest border border-outline-variant/30 hover:border-alpine-green/40 transition-colors">
-<span class="material-symbols-outlined text-primary text-2xl mb-4">terminal</span>
-<h3 class="font-headline text-xl font-bold text-marine-blue mb-2">Systems and Communications</h3>
-<p class="text-sm text-on-surface-variant font-light leading-relaxed">
-              The tools your team and ours use to stay aligned.
-            </p>
-</div>
-<!-- Card 5 -->
-<div class="p-7 rounded-xl bg-surface-container-lowest border border-outline-variant/30 hover:border-alpine-green/40 transition-colors md:col-span-2 lg:col-span-2">
-<span class="material-symbols-outlined text-primary text-2xl mb-4">surround_sound</span>
-<h3 class="font-headline text-xl font-bold text-marine-blue mb-2">Spatial Curation &amp; Environmental Production</h3>
-<p class="text-sm text-on-surface-variant font-light leading-relaxed">
-              Acoustic, lighting, and site activation specifications.
-            </p>
-</div>
-</div>
-</div>
+
+<section class="section section--tint" id="how-we-work">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">How we work</p>
+      <h2>Six steps from diagnostic to stewardship</h2>
+      <p class="lede">The order is the point. Each step leaves behind what the next one needs, so nothing is decided twice and nothing is lost between handoffs.</p>
+    </div>
+    <div class="steps cols-3">
+      <article class="step reveal"><div class="step-top"><span class="step-num">01</span><svg class="i" aria-hidden="true" focusable="false"><use href="#i-diagnostic"/></svg></div><h3>Diagnostic</h3><p>We begin with what you already hold: assets, relationships, materials and timelines.</p><span class="stage">Discovery &amp; audit</span></article>
+      <article class="step reveal" data-d="1"><div class="step-top"><span class="step-num">02</span><svg class="i" aria-hidden="true" focusable="false"><use href="#i-thesis"/></svg></div><h3>Portfolio thesis</h3><p>One organizing design that makes separate properties read as one world.</p><span class="stage">Conceptual synthesis</span></article>
+      <article class="step reveal" data-d="2"><div class="step-top"><span class="step-num">03</span><svg class="i" aria-hidden="true" focusable="false"><use href="#i-nodes"/></svg></div><h3>Brand and audience by node</h3><p>Mission, identity, price band and guest profile, set for each property.</p><span class="stage">Node specifications</span></article>
+      <article class="step reveal"><div class="step-top"><span class="step-num">04</span><svg class="i" aria-hidden="true" focusable="false"><use href="#i-signal"/></svg></div><h3>Pre-launch</h3><p>Renders, stories and campaigns that build demand before the property exists.</p><span class="stage">Market cultivation</span></article>
+      <article class="step reveal" data-d="1"><div class="step-top"><span class="step-num">05</span><svg class="i" aria-hidden="true" focusable="false"><use href="#i-door"/></svg></div><h3>Opening</h3><p>The experience product, built and ready on day one.</p><span class="stage">Operational reality</span></article>
+      <article class="step reveal" data-d="2"><div class="step-top"><span class="step-num">06</span><svg class="i" aria-hidden="true" focusable="false"><use href="#i-stewardship"/></svg></div><h3>Stewardship</h3><p>A retainer that protects the original intent as operations settle in.</p><span class="stage">Ongoing retainer</span></article>
+    </div>
+    <p style="margin-top:36px"><a class="link-arrow" href="how-we-work.html">Read the six steps <svg class="i" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></a></p>
+  </div>
 </section>
-<!-- 7. WAYS TO WORK WITH US (ENGAGEMENT MODELS) -->
-<section class="w-full py-24 bg-surface-container-low/50 border-y border-outline-variant/30" id="engagement-models">
-<div class="max-w-[1240px] mx-auto px-6 lg:px-10">
-<div class="text-center max-w-xl mx-auto mb-16">
-<span class="text-[11px] font-semibold tracking-[0.2em] uppercase text-alpine-green block mb-1">Engagement Structures</span>
-<h2 class="font-headline text-3xl sm:text-5xl font-semibold text-marine-blue tracking-tight">
-            Ways to Work With Us
-          </h2>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-<!-- Advisory -->
-<div class="bg-surface-container-lowest rounded-2xl p-8 border border-outline-variant/40 shadow-sm flex flex-col justify-between relative overflow-hidden">
-<div class="absolute top-0 left-0 w-full h-1 bg-surface-container-high"></div>
-<div>
-<span class="text-[11px] uppercase tracking-[0.16em] text-alpine-green font-semibold block mb-2">Tier I</span>
-<h3 class="font-headline text-3xl font-semibold text-marine-blue mb-4">Advisory</h3>
-<p class="text-sm text-on-surface-variant font-light leading-relaxed mb-6">
-                On-call counsel for a venue or business that needs expert judgment without a full engagement.
-              </p>
-<ul class="space-y-3 text-xs text-on-surface-variant mb-8">
-<li class="flex items-center gap-2">
-<span class="material-symbols-outlined text-alpine-green text-sm">check</span>
-<span>Bi-weekly architectural &amp; concept reviews</span>
-</li>
-<li class="flex items-center gap-2">
-<span class="material-symbols-outlined text-alpine-green text-sm">check</span>
-<span>Direct diagnostic audits &amp; critiques</span>
-</li>
-<li class="flex items-center gap-2">
-<span class="material-symbols-outlined text-alpine-green text-sm">check</span>
-<span>Access to executive advisory memos</span>
-</li>
-</ul>
-</div>
-<a class="w-full py-3 text-center text-xs font-semibold uppercase tracking-wider text-marine-blue bg-surface-container rounded-lg hover:bg-surface-container-high transition-colors" href="#contact">
-              Inquire Advisory
-            </a>
-</div>
-<!-- Project -->
-<div class="bg-surface-container-lowest rounded-2xl p-8 border-2 border-juniper-green shadow-md flex flex-col justify-between relative overflow-hidden">
-<div class="absolute top-0 right-0 bg-juniper-green text-fog-white px-3 py-1 rounded-bl-lg text-[10px] uppercase font-bold tracking-widest">
-              Core Practice
-            </div>
-<div>
-<span class="text-[11px] uppercase tracking-[0.16em] text-juniper-green font-semibold block mb-2">Tier II</span>
-<h3 class="font-headline text-3xl font-semibold text-marine-blue mb-4">Project</h3>
-<p class="text-sm text-on-surface-variant font-light leading-relaxed mb-6">
-                A defined scope from diagnostic through launch, built around your timeline.
-              </p>
-<ul class="space-y-3 text-xs text-on-surface-variant mb-8">
-<li class="flex items-center gap-2">
-<span class="material-symbols-outlined text-juniper-green text-sm">check</span>
-<span>Full six-phase engagement execution</span>
-</li>
-<li class="flex items-center gap-2">
-<span class="material-symbols-outlined text-juniper-green text-sm">check</span>
-<span>Dedicated specialist pod assembly</span>
-</li>
-<li class="flex items-center gap-2">
-<span class="material-symbols-outlined text-juniper-green text-sm">check</span>
-<span>Pre-launch demand generation and launch sprint</span>
-</li>
-</ul>
-</div>
-<a class="w-full py-3 text-center text-xs font-semibold uppercase tracking-wider text-fog-white bg-juniper-green rounded-lg hover:bg-primary transition-colors" href="#contact">
-              Inquire Project Scope
-            </a>
-</div>
-<!-- Retainer -->
-<div class="bg-surface-container-lowest rounded-2xl p-8 border border-outline-variant/40 shadow-sm flex flex-col justify-between relative overflow-hidden">
-<div class="absolute top-0 left-0 w-full h-1 bg-alpine-green"></div>
-<div>
-<span class="text-[11px] uppercase tracking-[0.16em] text-alpine-green font-semibold block mb-2">Tier III</span>
-<h3 class="font-headline text-3xl font-semibold text-marine-blue mb-4">Retainer</h3>
-<p class="text-sm text-on-surface-variant font-light leading-relaxed mb-6">
-                Ongoing partnership as your outside experience department, holding design intent as you grow.
-              </p>
-<ul class="space-y-3 text-xs text-on-surface-variant mb-8">
-<li class="flex items-center gap-2">
-<span class="material-symbols-outlined text-alpine-green text-sm">check</span>
-<span>Portfolio-scale design governance</span>
-</li>
-<li class="flex items-center gap-2">
-<span class="material-symbols-outlined text-alpine-green text-sm">check</span>
-<span>Continuous operational ritual refinement</span>
-</li>
-<li class="flex items-center gap-2">
-<span class="material-symbols-outlined text-alpine-green text-sm">check</span>
-<span>Full Client OS &amp; dedicated room access</span>
-</li>
-</ul>
-</div>
-<a class="w-full py-3 text-center text-xs font-semibold uppercase tracking-wider text-marine-blue bg-surface-container rounded-lg hover:bg-surface-container-high transition-colors" href="#contact">
-              Inquire Retainer
-            </a>
-</div>
-</div>
-</div>
+
+<section class="section" id="specialists">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">Specialists</p>
+      <h2>A collective matched to the engagement</h2>
+      <p class="lede">We do not assign from a bench. We assemble the people your portfolio needs, across five disciplines, and you work with them directly.</p>
+    </div>
+    <div class="grid grid-3">
+      <article class="card reveal"><span class="icon-chip"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-economics"/></svg></span><h3>Economics &amp; experience architecture</h3><p>Hospitality business structure, pricing logic and the design of the guest journey.</p></article>
+      <article class="card reveal" data-d="1"><span class="icon-chip"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-culinary"/></svg></span><h3>Culinary &amp; kitchen management</h3><p>Concept, menu strategy and operational readiness.</p></article>
+      <article class="card reveal" data-d="2"><span class="icon-chip"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-design"/></svg></span><h3>Brand, marketing &amp; product design</h3><p>Identity, rendering, storytelling and campaign.</p></article>
+      <article class="card reveal"><span class="icon-chip"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-systems"/></svg></span><h3>Systems &amp; communications</h3><p>The tools your team and ours use to stay aligned.</p></article>
+      <article class="card reveal" data-d="1"><span class="icon-chip"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-spatial"/></svg></span><h3>Spatial curation &amp; environmental production</h3><p>Acoustic, lighting and site activation specifications.</p></article>
+      <figure class="frame reveal" data-d="2" style="margin:0">
+        <img src="assets/img/kitchen-1400.webp" srcset="assets/img/kitchen-900.webp 900w, assets/img/kitchen-1400.webp 1400w" sizes="(min-width: 980px) 380px, 100vw" width="1400" height="930" alt="An empty professional restaurant kitchen before dinner service, with steel surfaces, copper pans and neat rows of prepared ingredients." loading="lazy" decoding="async">
+      </figure>
+    </div>
+    <p style="margin-top:36px"><a class="link-arrow" href="specialists.html">Meet the disciplines <svg class="i" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></a></p>
+  </div>
 </section>
-<!-- 8. WHO IT IS FOR -->
-<section class="w-full py-24 bg-surface">
-<div class="max-w-[1240px] mx-auto px-6 lg:px-10">
-<div class="max-w-3xl">
-<span class="text-[11px] font-semibold tracking-[0.2em] uppercase text-alpine-green">Portfolio Profiles</span>
-<h2 class="font-headline text-3xl sm:text-5xl font-semibold text-marine-blue tracking-tight mt-1 mb-6">
-            Who It Is For
-          </h2>
-<p class="font-headline text-2xl sm:text-3xl text-primary font-normal leading-relaxed mb-10 italic">
-            Developers and owners with multiple properties in construction or planning, hospitality operators, venue owners, and founders whose product is an experience.
-          </p>
-</div>
-<div class="flex flex-wrap gap-3 pt-2">
-<span class="px-5 py-2.5 rounded-full bg-surface-container border border-outline-variant/40 text-xs font-semibold uppercase tracking-wider text-marine-blue">
-            Boutique Hospitality Developers
-          </span>
-<span class="px-5 py-2.5 rounded-full bg-surface-container border border-outline-variant/40 text-xs font-semibold uppercase tracking-wider text-marine-blue">
-            Multi-Venue Owners
-          </span>
-<span class="px-5 py-2.5 rounded-full bg-surface-container border border-outline-variant/40 text-xs font-semibold uppercase tracking-wider text-marine-blue">
-            Destination Retreat Founders
-          </span>
-<span class="px-5 py-2.5 rounded-full bg-surface-container border border-outline-variant/40 text-xs font-semibold uppercase tracking-wider text-marine-blue">
-            Experience-First Operators
-          </span>
-</div>
-</div>
+
+<section class="section section--tint" id="engagement-models">
+  <div class="container">
+    <div class="section-head center reveal">
+      <p class="eyebrow">Ways to work together</p>
+      <h2>Three engagements, scaled to what you need</h2>
+    </div>
+    <div class="tiers">
+      <article class="tier reveal">
+        <div class="meta"><span>Tier I</span></div>
+        <h3>Advisory</h3>
+        <p>On-call counsel for a venue or business that needs expert judgment without a full engagement.</p>
+        <ul class="ticks"><li><svg class="i" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>Bi-weekly architectural &amp; concept reviews</span></li><li><svg class="i" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>Direct diagnostic audits &amp; critiques</span></li><li><svg class="i" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>Access to executive advisory memos</span></li></ul>
+        <a class="btn btn-ghost" href="engagements.html#advisory">Ask about Advisory</a>
+      </article>
+      <article class="tier tier--core reveal" data-d="1">
+        <div class="meta"><span>Tier II</span><span class="core-flag">Core practice</span></div>
+        <h3>Project</h3>
+        <p>A defined scope from diagnostic through launch, built around your timeline.</p>
+        <ul class="ticks"><li><svg class="i" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>Full six-phase engagement execution</span></li><li><svg class="i" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>Dedicated specialist pod assembly</span></li><li><svg class="i" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>Pre-launch demand generation and launch sprint</span></li></ul>
+        <a class="btn btn-primary" href="engagements.html#project">Ask about a Project</a>
+      </article>
+      <article class="tier reveal" data-d="2">
+        <div class="meta"><span>Tier III</span></div>
+        <h3>Retainer</h3>
+        <p>Ongoing partnership as your outside experience department, holding design intent as you grow.</p>
+        <ul class="ticks"><li><svg class="i" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>Portfolio-scale design governance</span></li><li><svg class="i" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>Continuous operational ritual refinement</span></li><li><svg class="i" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>Full Client OS &amp; dedicated room access</span></li></ul>
+        <a class="btn btn-ghost" href="engagements.html#retainer">Ask about a Retainer</a>
+      </article>
+    </div>
+    <p style="margin-top:36px; text-align:center"><a class="link-arrow" href="engagements.html">Compare the engagements <svg class="i" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></a></p>
+  </div>
 </section>
-<!-- 9. INSIDE YOUR CLIENT PORTAL -->
-<section class="w-full py-24 bg-surface-container-low border-t border-outline-variant/30" id="portal">
-<div class="max-w-[1240px] mx-auto px-6 lg:px-10">
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-12">
-<div class="lg:col-span-6 space-y-4">
-<span class="text-[11px] font-semibold tracking-[0.2em] uppercase text-alpine-green">Client Operating System</span>
-<h2 class="font-headline text-3xl sm:text-5xl font-semibold text-marine-blue tracking-tight">
-              Inside Your Client Portal
-            </h2>
-<p class="text-base sm:text-lg text-on-surface-variant font-light leading-relaxed">
-              Your portfolio at a glance, with each property's brand, tier, audience, and opening status. Milestones and a live status feed. A decision log so approvals are never lost. A shared document room. Direct access to the specialists on your engagement.
-            </p>
-</div>
-<div class="lg:col-span-6 flex flex-wrap gap-2.5 justify-start lg:justify-end">
-<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-lowest border border-outline-variant/40 text-xs text-marine-blue font-medium">
-<span class="material-symbols-outlined text-alpine-green text-sm">dynamic_feed</span>
-<span>Multi-Property Status Feed</span>
-</div>
-<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-lowest border border-outline-variant/40 text-xs text-marine-blue font-medium">
-<span class="material-symbols-outlined text-alpine-green text-sm">history_edu</span>
-<span>Archived Decision Log</span>
-</div>
-<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-lowest border border-outline-variant/40 text-xs text-marine-blue font-medium">
-<span class="material-symbols-outlined text-alpine-green text-sm">timeline</span>
-<span>Milestone Tracking</span>
-</div>
-<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-lowest border border-outline-variant/40 text-xs text-marine-blue font-medium">
-<span class="material-symbols-outlined text-alpine-green text-sm">support_agent</span>
-<span>Specialist Access</span>
-</div>
-</div>
-</div>
-<!-- Portal Visual UI -->
-<div class="relative w-full rounded-2xl overflow-hidden shadow-2xl border border-outline-variant/40 bg-surface-container-lowest">
-<div class="relative aspect-[16/9] w-full overflow-hidden">
-<img alt="Client portal dashboard showing multi-property portfolio tracking and milestone timelines" class="w-full h-full object-cover object-top" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrPToB5n1Qv1PtuP27lfm5ypzXocaGdJQ3tOSlg0hxkJ-yy59sDq3alw1B8w-0GRE2XB8iULsTCsu4SMsKqOxdHsZc3b0C51aIPosThZYHoPG5dFJAPObohhrJ_9PdVKctpKC3-7zyDPCvbHiWpyVQUb_nQ6vZS80HiXhuFj-BQ8iTqHVTK6Nu_ydX-l1lOmott03XRiyjoSqgMw1ES9Err6ZQVqYdWTjz_5BWvys"/>
-</div>
-</div>
-</div>
+
+<section class="section" aria-labelledby="whofor">
+  <div class="container">
+    <div class="split">
+      <div class="reveal">
+        <p class="eyebrow">Who it is for</p>
+        <h2 id="whofor">For people whose product is an experience</h2>
+        <p class="lede">Developers and owners with multiple properties in construction or planning, hospitality operators, venue owners, and founders whose product is an experience. If a guest will feel your decisions, we should talk.</p>
+        <ul class="chips">
+          <li class="chip">Boutique hospitality developers</li><li class="chip">Multi-venue owners</li><li class="chip">Destination retreat founders</li><li class="chip">Experience-first operators</li>
+        </ul>
+        <p style="margin-top:28px"><a class="link-arrow" href="what-we-do.html#who">See who we work with <svg class="i" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></a></p>
+      </div>
+      <figure class="frame reveal" data-d="1" style="margin:0">
+        <img src="assets/img/lodge-path-1000.webp" srcset="assets/img/lodge-path-1000.webp 1000w" sizes="(min-width: 900px) 520px, 100vw" width="1000" height="1250" alt="A gravel path winding between tall pines toward a timber lodge with one warmly lit doorway at blue hour." loading="lazy" decoding="async">
+      </figure>
+    </div>
+  </div>
 </section>
-<!-- 10. CLOSING CALL TO ACTION -->
-<section class="w-full bg-juniper-green text-fog-white py-24 relative overflow-hidden" id="contact">
-<div class="absolute -right-24 -bottom-24 w-96 h-96 rounded-full bg-primary/40 blur-3xl pointer-events-none"></div>
-<div class="max-w-[800px] mx-auto px-6 lg:px-10 text-center space-y-6 relative z-10">
-<span class="material-symbols-outlined text-morning-red text-4xl">travel_explore</span>
-<h2 class="font-headline text-3xl sm:text-5xl lg:text-6xl font-semibold text-fog-white tracking-tight leading-tight">
-          Tell us what you are building. <span class="italic font-normal block sm:inline">We will tell you what it could become.</span>
-</h2>
-<p class="text-base sm:text-lg text-fog-white/80 max-w-xl mx-auto font-light leading-relaxed">
-          Schedule an exploratory diagnostic session or intake review for your upcoming development.
-        </p>
-<form class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4 max-w-md mx-auto" onsubmit="event.preventDefault(); this.querySelector('button').innerHTML='Request Received';">
-<input class="w-full sm:w-80 px-4 py-3.5 bg-surface-container-lowest text-on-surface rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-morning-red" placeholder="Enter executive or firm email..." required="" type="email"/>
-<button class="w-full sm:w-auto px-7 py-3.5 bg-marine-blue text-fog-white hover:bg-inverse-surface transition-colors rounded-lg text-xs font-semibold uppercase tracking-wider shrink-0" type="submit">
-            Start a conversation
-          </button>
-</form>
-<p class="text-xs text-fog-white/60 pt-2 tracking-wide font-light">
-          Discussions are treated under strict advisory confidentiality.
-        </p>
-</div>
+
+<section class="section section--tint" id="portal" aria-labelledby="portal-title">
+  <div class="container">
+    <div class="split wide-text" style="margin-bottom:56px">
+      <div class="reveal">
+        <p class="eyebrow">Client Operating System</p>
+        <h2 id="portal-title">Inside your client portal</h2>
+        <p class="lede">Intent is easiest to lose between meetings. The portal keeps the portfolio, the approvals and the people in one place, so what was decided stays decided and you can see where every property stands.</p>
+        <p><a class="btn btn-primary" href="portal.html">Explore the client portal <svg class="i" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></a></p>
+      </div>
+      <ul class="ticks reveal" data-d="1" style="gap:18px">
+        <li><svg class="i" aria-hidden="true" focusable="false"><use href="#i-overview"/></svg><span>Your portfolio at a glance: each property's brand, tier, audience and opening status</span></li>
+        <li><svg class="i" aria-hidden="true" focusable="false"><use href="#i-milestone"/></svg><span>Milestones and a live status feed</span></li>
+        <li><svg class="i" aria-hidden="true" focusable="false"><use href="#i-log"/></svg><span>A decision log, so approvals are never lost</span></li>
+        <li><svg class="i" aria-hidden="true" focusable="false"><use href="#i-folder"/></svg><span>A shared document room, and direct access to the specialists on your engagement</span></li>
+      </ul>
+    </div>
+    <figure class="reveal" style="margin:0" aria-labelledby="pm-cap">
+  <div class="portal-mock" aria-hidden="true">
+    <div class="pm-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="ttl">Client Operating System · Portfolio</span></div>
+    <div class="pm-body">
+      <div class="pm-pane">
+        <p class="pm-h">Portfolio at a glance</p>
+        <div class="pm-row"><div><b>Property one</b><span>Boutique retreat · Tier II · Guests: weekend travelers</span><div class="pm-prog"><i style="width:72%"></i></div></div><span class="pm-tag">Pre-launch</span></div>
+        <div class="pm-row"><div><b>Property two</b><span>Dining venue · Tier II · Guests: local regulars</span><div class="pm-prog"><i style="width:38%"></i></div></div><span class="pm-tag rose">Node specification</span></div>
+        <div class="pm-row"><div><b>Property three</b><span>Lodge · Tier III · Guests: destination groups</span><div class="pm-prog"><i style="width:100%"></i></div></div><span class="pm-tag">Open</span></div>
+      </div>
+      <div class="pm-pane">
+        <p class="pm-h">Live status feed</p>
+        <ul class="pm-feed">
+          <li>Renders for property one are ready for review</li>
+          <li>Decision logged: price band for property two</li>
+          <li>Milestone reached: portfolio thesis approved</li>
+          <li>New document in the room: opening plan, draft</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <figcaption class="figure-cap" id="pm-cap">An illustration of the portfolio view, the status feed and the milestones. The properties and entries shown are sample data, not a client.</figcaption>
+</figure>
+
+  </div>
 </section>
+
+<section class="cta-band" id="contact" aria-labelledby="cta-title">
+  <img src="assets/img/cliff-juniper-1920.webp" srcset="assets/img/cliff-juniper-1200.webp 1200w, assets/img/cliff-juniper-1920.webp 1920w" sizes="(min-width: 1180px) 1180px, 100vw" width="1920" height="1086" alt="A single windswept juniper on a grassy cliff edge above a sea of fog at first light." loading="lazy" decoding="async">
+  <div class="container">
+    <h2 id="cta-title">Tell us what you are building. <em>We will tell you what it could become.</em></h2>
+    <p>Begin with an exploratory diagnostic session or an intake review for an upcoming development. Bring what you have; we will find the rest together.</p>
+    <form class="mini-form" data-mailto data-subject="A conversation about what we are building" novalidate>
+      <div class="error-summary" tabindex="-1" role="alert" style="flex-basis:100%;text-align:left"><h2>Please correct the following before continuing</h2><ul></ul></div>
+      <div class="field" style="flex:1 1 260px;max-width:360px;text-align:left">
+        <label for="cta-email" class="visually-hidden">Your email</label>
+        <input id="cta-email" name="email" type="email" required autocomplete="email" placeholder="you@yourcompany.com" aria-describedby="cta-email-err">
+        <p class="error" id="cta-email-err" style="color:#ffd9d2"></p>
+      </div>
+      <button class="btn btn-light" type="submit">Open in my email app <svg class="i" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></button>
+      <p class="note" style="flex-basis:100%" data-status role="status">This opens your email app with a message addressed to inquiries@junipercollective.co. Nothing is sent from this page.</p>
+    </form>
+    <p class="note">Discussions are treated under strict advisory confidentiality.</p>
+    <p class="note"><a href="diagnostic.html">Or begin a diagnostic <svg class="i" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></a></p>
+  </div>
+</section>
+
 </main>
-<!-- 11. FOOTER -->
-<footer class="w-full bg-surface-container-low border-t border-outline-variant/30">
-<div class="max-w-[1240px] mx-auto px-6 lg:px-10 py-16">
-<div class="grid grid-cols-1 md:grid-cols-12 gap-10 mb-12">
-<div class="md:col-span-5 space-y-3">
-<div class="flex flex-col">
-<span class="font-headline text-2xl font-bold tracking-tight text-primary">Juniper Collective</span>
-<span class="text-xs uppercase tracking-widest text-alpine-green font-medium">Advisory Firm for Experience-Based Properties</span>
-</div>
-<p class="text-sm text-on-surface-variant max-w-sm font-light leading-relaxed">
-            Cascadia &amp; Global Practices | Portland, New York &amp; London
-          </p>
-<p class="text-xs text-on-surface-variant font-mono">
-            Direct intake: <a class="underline hover:text-primary" href="mailto:inquiries@junipercollective.co">inquiries@junipercollective.co</a>
-</p>
-</div>
-<div class="md:col-span-3 space-y-2">
-<span class="text-[11px] uppercase tracking-[0.18em] font-semibold text-marine-blue">Advisory Navigation</span>
-<ul class="space-y-1.5 text-xs text-on-surface-variant font-medium">
-<li><a class="hover:text-primary transition-colors" href="#what-we-do">What We Do</a></li>
-<li><a class="hover:text-primary transition-colors" href="#how-we-work">How We Work</a></li>
-<li><a class="hover:text-primary transition-colors" href="#specialists">Specialists</a></li>
-<li><a class="hover:text-primary transition-colors" href="#engagement-models">Engagement Models</a></li>
-</ul>
-</div>
-<div class="md:col-span-4 space-y-2">
-<span class="text-[11px] uppercase tracking-[0.18em] font-semibold text-marine-blue">Confidential Access</span>
-<ul class="space-y-1.5 text-xs text-on-surface-variant font-medium">
-<li><a class="hover:text-primary transition-colors" href="#portal">Client Portal Access</a></li>
-<li><a class="hover:text-primary transition-colors" href="#">Terms of Engagement</a></li>
-<li><a class="hover:text-primary transition-colors" href="#">Privacy &amp; Data Security</a></li>
-</ul>
-</div>
-</div>
-<div class="flex flex-col sm:flex-row items-center justify-between pt-8 border-t border-outline-variant/30 gap-4 text-xs text-on-surface-variant">
-<span>© 2025 Juniper Collective Advisory LLC. All rights reserved. Confidential Portfolio Architecture.</span>
-<div class="flex items-center gap-6">
-<a class="hover:text-primary transition-colors" href="#">Terms of Engagement</a>
-<a class="hover:text-primary transition-colors" href="#">Privacy &amp; Data Security</a>
-</div>
-</div>
-</div>
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a class="brand" href="index.html" aria-label="Juniper Collective, home">
+          <svg aria-hidden="true" focusable="false"><use href="#logo-mark"/></svg>
+          <span><span class="brand-name">Juniper Collective</span><span class="brand-sub">Advisory firm for experience-based properties</span></span>
+        </a>
+        <p class="footer-blurb">Advisory and portfolio architecture for experience-based businesses. One vision. Every property. Open before you open.</p>
+      </div>
+      <div>
+        <h2>The firm</h2>
+        <ul>
+          <li><a href="what-we-do.html">What we do</a></li>
+          <li><a href="how-we-work.html">How we work</a></li>
+          <li><a href="specialists.html">Specialists</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Work with us</h2>
+        <ul>
+          <li><a href="engagements.html">Engagements</a></li>
+          <li><a href="diagnostic.html">Begin a diagnostic</a></li>
+          <li><a href="portal.html">Client portal</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Direct intake</h2>
+        <ul>
+          <li><a href="mailto:inquiries@junipercollective.co">inquiries@junipercollective.co</a></li>
+          <li>Portland, New York &amp; London</li>
+          <li>Cascadia &amp; Global Practices</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-base">
+      <span>© 2025 Juniper Collective Advisory LLC. All rights reserved. Held in advisory confidence.</span>
+      <span><a href="terms.html">Terms of engagement</a> &nbsp;·&nbsp; <a href="privacy.html">Privacy &amp; data security</a> &nbsp;·&nbsp; <a class="to-top" href="#main"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-arrow-up-right"/></svg><span>Back to top</span></a></span>
+    </div>
+  </div>
 </footer>
-<script>
-(function () {
-  var intro = document.getElementById('intro');
-  if (!intro) return;
-  var root = document.documentElement;
-  if (root.classList.contains('intro-seen')) { intro.remove(); return; }
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { intro.remove(); return; }
-
-  // ---- timing & look ----
-  var SPEED = 1.5;            // whole intro plays at 1.5x
-  var T_BLUE = 20.5;          // clip second at which the sky is completely blue: ripple + text start
-  var TEXT_DELAY = 450;       // ms after the ripple starts until the first line appears
-  var THANKS_MS = 4000, NAME_MS = 4000;
-  var ZOOM_FROM = 2.0, ZOOM_TO = 1.06;  // opens on the tree, slowly pulls back
-  var ORIGIN = [0.49, 0.50];            // the tree, as a fraction of the frame
-  var RIPPLE_AT = [0.5, 0.47];          // ripple centre (where the type sits)
-
-  var video = document.getElementById('intro-video');
-  var canvas = document.getElementById('intro-gl');
-  var thanks = document.getElementById('intro-thanks');
-  var name = document.getElementById('intro-name');
-  var stage = document.getElementById('intro-stage');
-  var hint = document.getElementById('intro-sound-hint');
-  var soundBtn = document.getElementById('intro-sound');
-  var soundIcon = document.getElementById('intro-sound-icon');
-  var soundLabel = document.getElementById('intro-sound-label');
-  var timers = [], finished = false, userMuted = false;
-  var rippleStart = 0, textStarted = false;
-
-  var audio = new Audio('media/ambience.m4a');
-  audio.preload = 'auto';
-  audio.volume = 0.85;
-
-  root.classList.add('intro-lock');
-  video.defaultPlaybackRate = SPEED;
-  video.playbackRate = SPEED;
-
-  function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
-  function ease(p) { return 0.5 - 0.5 * Math.cos(Math.PI * p); }   // in-out sine
-
-  function setStage(s) {
-    intro.classList.remove('s-thanks', 's-name');
-    intro.classList.add('s-hold');
-    if (s) intro.classList.add(s);
-  }
-  function showCard(card, ms) {
-    card.classList.remove('off'); card.classList.add('on');
-    later(function () { card.classList.remove('on'); card.classList.add('off'); }, ms - 900);
-  }
-
-  // ---- ripple + text start together ----
-  function startText() {
-    if (textStarted || finished) return;
-    textStarted = true;
-    rippleStart = performance.now();
-    setStage('s-thanks');
-    later(function () { showCard(thanks, THANKS_MS); }, TEXT_DELAY);
-    later(function () { setStage('s-name'); showCard(name, NAME_MS); }, TEXT_DELAY + THANKS_MS);
-    later(finish, TEXT_DELAY + THANKS_MS + NAME_MS);
-  }
-
-  // ---- WebGL: zoom + ripple over the video ----
-  var gl = null, prog, U = {}, tex;
-  function initGL() {
-    try { gl = canvas.getContext('webgl', { alpha: false, antialias: false, powerPreference: 'low-power' }); } catch (e) {}
-    if (!gl) return false;
-    function sh(type, src) {
-      var o = gl.createShader(type); gl.shaderSource(o, src); gl.compileShader(o);
-      if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o));
-      return o;
-    }
-    try {
-      prog = gl.createProgram();
-      gl.attachShader(prog, sh(gl.VERTEX_SHADER,
-        'attribute vec2 p; varying vec2 v; void main(){ v = vec2(p.x*.5+.5, .5-p.y*.5); gl_Position = vec4(p,0.,1.); }'));
-      gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, [
-        'precision mediump float;',
-        'uniform sampler2D tex; uniform vec2 cover, origin, centre; uniform float zoom, aspect, rt;',
-        'varying vec2 v;',
-        'void main(){',
-        '  vec2 uv = v; float shade = 0.;',
-        '  if (rt >= 0.) {',
-        '    vec2 q = (uv - centre) * vec2(aspect, 1.);',
-        '    float d = length(q);',
-        '    float x = d - rt * .6;',                                   // ring front travels outward
-        '    float env = smoothstep(-.26, -.02, x) * (1. - smoothstep(0., .035, x));',
-        '    float h = sin(x * 54.) * env * exp(-rt * .55);',           // trailing concentric rings, fading
-        '    uv += (q / max(d, 1e-4)) * h * .013 * vec2(1. / aspect, 1.);',
-        '    shade = h;',
-        '  }',
-        '  vec2 z = origin + (uv - origin) / zoom;',
-        '  vec2 t = (z - .5) * cover + .5;',
-        '  vec3 c = texture2D(tex, t).rgb + shade * .07;',             // light catching the water
-        '  gl_FragColor = vec4(c, 1.);',
-        '}'].join('\n')));
-      gl.linkProgram(prog);
-      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error('link');
-      gl.useProgram(prog);
-      var buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
-      var loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc);
-      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-      ['tex','cover','origin','centre','zoom','aspect','rt'].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
-      tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-      gl.uniform1i(U.tex, 0);
-      gl.uniform2f(U.origin, ORIGIN[0], ORIGIN[1]);
-      gl.uniform2f(U.centre, RIPPLE_AT[0], RIPPLE_AT[1]);
-      return true;
-    } catch (e) { gl = null; return false; }
-  }
-
-  function resize() {
-    var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    var w = Math.min(Math.round(window.innerWidth * dpr), 1920);
-    var h = Math.round(w * window.innerHeight / window.innerWidth);
-    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
-  }
-
-  var glReady = initGL();
-  if (glReady) { resize(); window.addEventListener('resize', resize); }
-
-  function frame(now) {
-    if (finished) return;
-    var dur = video.duration || 24.04, ct = video.currentTime || 0;
-    var p = Math.min(1, ct / dur);
-    var zoom = ZOOM_FROM + (ZOOM_TO - ZOOM_FROM) * ease(p);
-
-    if (!textStarted && ct >= T_BLUE) startText();
-
-    if (glReady) {
-      if (video.readyState >= 2) {
-        gl.viewport(0, 0, canvas.width, canvas.height);
-        gl.bindTexture(gl.TEXTURE_2D, tex);
-        try { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, video); } catch (e) { glReady = false; }
-        var va = (video.videoWidth || 16) / (video.videoHeight || 9), sa = window.innerWidth / window.innerHeight;
-        gl.uniform2f(U.cover, sa > va ? 1 : sa / va, sa > va ? va / sa : 1);
-        gl.uniform1f(U.zoom, zoom);
-        gl.uniform1f(U.aspect, sa);
-        var rt = textStarted ? (now - rippleStart) / 1000 : -1;
-        gl.uniform1f(U.rt, rt > 6 ? -1 : rt);
-        gl.drawArrays(gl.TRIANGLES, 0, 3);
-        intro.classList.add('gl-on');
-      }
-    } else {
-      video.style.transformOrigin = (ORIGIN[0] * 100) + '% ' + (ORIGIN[1] * 100) + '%';
-      video.style.transform = 'scale(' + zoom.toFixed(4) + ')';
-    }
-    requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
-
-  video.addEventListener('ended', startText);
-  video.addEventListener('error', startText);
-  video.querySelectorAll('source').forEach(function (s) { s.addEventListener('error', function () {
-    if (video.networkState === 3) startText();
-  }); });
-  var pv = video.play();
-  if (pv && pv.catch) pv.catch(function () { /* autoplay blocked: go to the text after a beat */ later(startText, 600); });
-
-  // ---- sound ----
-  function renderSound() {
-    var on = !audio.paused && !audio.muted;
-    soundIcon.textContent = on ? 'volume_up' : 'volume_off';
-    soundLabel.textContent = on ? 'Sound on' : 'Sound off';
-    soundBtn.setAttribute('aria-pressed', String(on));
-  }
-  function startAudio() {
-    if (finished || userMuted || !audio.paused) return;
-    try { audio.currentTime = Math.min((video.currentTime || 0) / SPEED, 22); } catch (e) {}
-    var pa = audio.play();
-    if (pa && pa.then) {
-      pa.then(function () { hint.hidden = true; renderSound(); })
-        .catch(function () { hint.hidden = false; renderSound(); });
-    }
-  }
-
-  function finish() {
-    if (finished) return;
-    finished = true;
-    try { sessionStorage.setItem('jc-intro-seen', '1'); } catch (e) {}
-    timers.forEach(clearTimeout);
-    intro.classList.add('done');
-    root.classList.remove('intro-lock');
-    window.scrollTo(0, 0);
-    // fade the music out with the overlay
-    var t0 = performance.now(), v0 = audio.volume;
-    (function fade(now) {
-      var k = Math.min(1, (now - t0) / 2200);
-      audio.volume = v0 * (1 - k);
-      if (k < 1) requestAnimationFrame(fade); else { audio.pause(); video.pause(); }
-    })(t0);
-    setTimeout(function () { intro.remove(); }, 2600);
-  }
-
-  startAudio();
-  ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) {
-    window.addEventListener(ev, function once() {
-      if (audio.paused && !userMuted) startAudio();
-      window.removeEventListener(ev, once);
-    }, { passive: true });
-  });
-  soundBtn.addEventListener('click', function (e) {
-    e.stopPropagation();
-    if (audio.paused) { userMuted = false; audio.muted = false; startAudio(); }
-    else { audio.muted = !audio.muted; userMuted = audio.muted; }
-    hint.hidden = true; renderSound();
-  });
-  document.getElementById('intro-skip').addEventListener('click', finish);
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') finish(); });
-
-  // slight pointer parallax on the type
-  intro.addEventListener('pointermove', function (e) {
-    var x = e.clientX / window.innerWidth - .5, y = e.clientY / window.innerHeight - .5;
-    stage.style.setProperty('--ry', (x * 5).toFixed(2) + 'deg');
-    stage.style.setProperty('--rx', (-y * 4).toFixed(2) + 'deg');
-  });
-  renderSound();
-})();
-</script>
-</body></html>
+<script src="assets/js/site.js" defer></script>
+<script src="assets/js/intro.js" defer></script>
+</body>
+</html>
