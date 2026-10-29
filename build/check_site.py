@@ -12,7 +12,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 class Page(html.parser.HTMLParser):
     def __init__(self):
         super().__init__(); self.ids = set(); self.dups = []; self.hrefs = []; self.h = []
-        self.imgs = []; self.controls = []; self.labels = set()
+        self.imgs = []; self.controls = []; self.labels = set(); self.in_label = 0
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
         if "id" in a:
@@ -21,8 +21,12 @@ class Page(html.parser.HTMLParser):
         if tag == "a" and "href" in a: self.hrefs.append(a["href"])
         if tag in ("h1", "h2", "h3", "h4"): self.h.append(int(tag[1]))
         if tag == "img": self.imgs.append(a)
-        if tag in ("input", "select", "textarea") and a.get("type") != "hidden": self.controls.append(a)
-        if tag == "label" and "for" in a: self.labels.add(a["for"])
+        if tag == "label":
+            self.in_label += 1
+            if "for" in a: self.labels.add(a["for"])
+        if tag in ("input", "select", "textarea") and a.get("type") != "hidden" and not self.in_label: self.controls.append(a)
+    def handle_endtag(self, tag):
+        if tag == "label" and self.in_label: self.in_label -= 1
 
 def main():
     pages = {}

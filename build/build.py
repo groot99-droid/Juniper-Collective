@@ -9,6 +9,9 @@ Tokens in a body:
     {{icon:name}}                                an inline SVG icon from build/icons.py
     {{photo:name|alt|class|sizes|eager}}         a responsive <img> from assets/img (alt may be empty for decoration)
     {{include:name}}                             src/partials/name.html
+    {{avatar:slug|Full Name}}                    assets/img/team/<slug>.(webp|jpg|jpeg|png) if present, else initials
+A page may set `script: name` in its front matter to load assets/js/name.js.
+The public address comes from src/site-url.txt (change it when the domain goes live; see docs/LAUNCH.md).
 """
 import re, sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
@@ -16,7 +19,7 @@ import icons
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = ROOT / "src"
-BASE = "https://groot99-droid.github.io/Juniper-Collective/"
+BASE = (SRC / "site-url.txt").read_text().strip().rstrip("/") + "/"
 SITE = "Juniper Collective"
 
 # name -> (widths available, native width, native height)
@@ -52,11 +55,21 @@ def icon(m):
     if n not in icons.ICONS: raise SystemExit(f"unknown icon: {n}")
     return f'<svg class="i" aria-hidden="true" focusable="false"><use href="#i-{n}"/></svg>'
 
+def avatar(m):
+    slug, _, name = m.group(1).partition("|")
+    for ext in ("webp", "jpg", "jpeg", "png"):
+        if (ROOT / "assets" / "img" / "team" / f"{slug}.{ext}").exists():
+            return (f'<img class="avatar" src="assets/img/team/{slug}.{ext}" width="400" height="400" '
+                    f'alt="{esc(name)}" loading="lazy" decoding="async">')
+    initials = "".join(w[0] for w in name.split()[:2]).upper()
+    return f'<div class="avatar avatar--initials" role="img" aria-label="{esc(name)}">{esc(initials)}</div>'
+
 def expand(text):
     for _ in range(3):
         text = re.sub(r"\{\{include:([\w-]+)\}\}", lambda m: (SRC / "partials" / f"{m.group(1)}.html").read_text(), text)
     text = re.sub(r"\{\{icon:([\w-]+)\}\}", icon, text)
     text = re.sub(r"\{\{photo:([^}]*)\}\}", photo, text)
+    text = re.sub(r"\{\{avatar:([^}]*)\}\}", avatar, text)
     return text
 
 def parse(path):
@@ -75,6 +88,7 @@ def render(slug, meta, body, layout):
     out = layout
     extra_head = f'<link rel="stylesheet" href="assets/css/intro.css">\n' if slug == "index" else ""
     extra_js = '<script src="assets/js/intro.js" defer></script>\n' if slug == "index" else ""
+    if meta.get("script"): extra_js += f'<script src="assets/js/{meta["script"]}.js" defer></script>\n'
     rep = {
         "{{title}}": esc(title), "{{description}}": esc(meta["description"]),
         "{{canonical}}": BASE if slug == "index" else BASE + page,

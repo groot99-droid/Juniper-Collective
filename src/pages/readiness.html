@@ -1,0 +1,44 @@
+<!--
+title: Property readiness check
+description: Eight plain questions about your property and plan. See where it is strong, where it is exposed, and which kind of help fits. Runs in your browser; nothing is stored.
+nav: readiness
+script: readiness
+-->
+<section class="page-hero page-hero--plain" aria-labelledby="h1">
+  <div class="container">
+    <ol class="crumbs" aria-label="Breadcrumb"><li><a href="index.html">Home</a></li><li aria-current="page">Readiness check</li></ol>
+    <p class="eyebrow">Readiness check</p>
+    <h1 id="h1">How ready is your property?</h1>
+    <p class="lede">Eight plain questions. You get a read on where your plan is strong, where it is exposed, and which kind of help fits. It takes about five minutes.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="narrow">
+    <noscript><p class="draft-banner">This check needs JavaScript. You can <a href="contact.html">write to us</a> instead and we will walk through the same questions with you.</p></noscript>
+    <form id="quiz" class="quiz" novalidate>
+      <div id="quiz-qs"></div>
+      <p class="error-line" id="quiz-error" role="alert" hidden>Please answer every question to see your result.</p>
+      <div class="btn-row"><button class="btn btn-primary" type="submit">Show my result {{icon:arrow-right}}</button></div>
+      <p class="small muted" style="margin-top:16px">Nothing you choose is stored or sent. A conversation starter, not an assessment: it cannot see your property, your numbers or your market.</p>
+    </form>
+
+    <section id="result" class="result" aria-labelledby="result-h" hidden tabindex="-1">
+      <p class="eyebrow">Your read</p>
+      <h2 id="result-h"></h2>
+      <p class="lede" id="result-lede"></p>
+      <div class="meter" aria-hidden="true"><i id="meter-fill"></i></div>
+      <p class="small muted" id="result-score"></p>
+      <h3>Where you stand</h3>
+      <ul class="areas" id="result-areas"></ul>
+      <h3>Where we would start</h3>
+      <p id="result-fit"></p>
+      <div class="btn-row">
+        <a class="btn btn-primary" id="result-mail" href="contact.html">Email this to us {{icon:arrow-right}}</a>
+        <a class="btn btn-ghost" href="diagnostic.html">Book a diagnostic</a>
+        <button class="btn btn-ghost" type="button" id="quiz-reset">Start again</button>
+      </div>
+      <p class="small muted" style="margin-top:16px">Emailing opens your own email app with your answers filled in, addressed to inquiries@junipercollective.co. It sends nothing from this page.</p>
+    </section>
+  </div>
+</section>
