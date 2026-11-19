@@ -8,7 +8,8 @@ src/layout.html        header, footer, head tags
 src/pages/*.html       one file per page: a front-matter comment, then the body
 src/partials/          the intro overlay, the portal illustration
 assets/css|js|img      stylesheet, scripts, WebP photographs and the favicon
-media/                 the intro video (mp4 + webm) and its soundtrack
+media/                 the intro video (webm; intro.js also tries an mp4, which is not
+                       versioned) and its ambience track
 build/build.py         builds the pages, sitemap.xml and robots.txt at the repo root
 build/check_site.py    heading, alt, label, id and link checks
 build/icons.py         the icon set and the logomark
