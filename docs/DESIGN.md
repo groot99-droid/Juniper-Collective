@@ -1,5 +1,7 @@
 # Design record
 
+> **Status, 2026-11-19:** Historical record, kept as written on 2026-10-28 for the first redesign (#5). Current state: round two (#6) rewrote the copy around the founders, the Reserve and Arkansas, added Our work (`src/pages/reserve.html`), the readiness check and the diagnostic checklist, and renamed Specialists to The collective; the design system itself is unchanged. See `docs/OPEN-QUESTIONS.md` and `docs/LAUNCH.md` for what is open.
+
 How the redesign was reasoned, using the ui-design toolkit (`plugins/ui-design` in the Pipelines-Plugin repo). Nothing was persisted into that repo; commands were run read-only.
 
 ## Dissecting the original page

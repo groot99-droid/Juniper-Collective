@@ -22,7 +22,7 @@ The copy was drafted with the creative-writing tool from the facts on the origin
 ## Process and deliverables
 - **What we do**, the "Likely deliverables" under each of the four phases (commercial ethos statement, property differentiation map, yield model, visual identity system, tiered guest segmentation, private interest list, editorial narrative, founder salon program, opening staging plan, operational ritual set, design governance retainer).
 - **How we work**, every "What you receive" and "What we ask of you" list for the six steps; the named deliverable "The Portfolio Thesis"; the statement that each step "leaves behind what the next needs".
-- **Specialists**, the three bullets under each discipline; the three-step "how a pod is assembled" (read the engagement, seat the pod, open the line).
+- **The collective** (`specialists.html`, formerly Specialists), the three bullets under each discipline; the three-step "how a pod is assembled" (read the engagement, seat the pod, open the line).
 
 ## Engagements
 - The fourth bullet on each tier: *a single point of contact who knows your property and its intent* (Advisory), *client portal access for the length of the project* (Project), *a standing relationship with the specialists who know your portfolio* (Retainer).

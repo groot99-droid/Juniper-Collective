@@ -5,14 +5,16 @@ Ten photographs generated with Higgsfield, model `gpt_image_2_5`, quality `high`
 | File | Used on | Subject |
 |---|---|---|
 | hero-pavilion | home hero | timber and glass pavilion in conifers at blue hour |
-| cliff-juniper | closing call to action on most pages, 404, social image | the lone juniper above a sea of fog |
-| three-buildings | home, What we do | three buildings, one clearing: a portfolio |
-| scale-model | How we work, Diagnostic | architect's model on a plinth |
-| kitchen | Specialists, home | kitchen pass before service |
-| venue | Specialists hero | empty venue before opening |
+| cliff-juniper | closing call to action on home, What we do, How we work, The collective, Engagements, 404; social image (`og:image`) | the lone juniper above a sea of fog |
+| three-buildings | What we do | three buildings, one clearing: a portfolio |
+| scale-model | home, How we work, Begin a diagnostic | architect's model on a plinth |
+| kitchen | The collective | kitchen pass before service |
+| venue | The collective hero | empty venue before opening |
 | studio-table | How we work | swatches and sketches of a tree mark |
 | lodge-path | home, What we do | path to a lit lodge door |
-| dining-terrace | Specialists, Engagements hero | set table at golden hour |
-| writing-desk | Contact, Diagnostic | desk, notebook, juniper sprig at dawn |
+| dining-terrace | Engagements hero | set table at golden hour |
+| writing-desk | Contact, Begin a diagnostic | desk, notebook, juniper sprig at dawn |
+
+Where each photograph appears is read from the `{{photo:…}}` tokens in `src/pages/` (2026-11-19); Our work, the readiness check, the diagnostic checklist and the client portal use none.
 
 These are illustrations of an atmosphere, not photographs of real client properties, and should not be presented as such.
